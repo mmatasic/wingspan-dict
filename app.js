@@ -1,31 +1,11 @@
+import { languages } from "./languages.js";
+
 const wingsearchUrl = "https://navarog.github.io/wingsearch/card/";
 const wingsearchCsv = "assets/wingsearch.csv";
 const searchInput = document.getElementById("search-input");
 const resultsSection = document.querySelector(".results");
 const resultsHeading = document.querySelector("[data-results-heading]");
 const languagePickerElement = document.querySelector("[data-language-picker]");
-
-const languages = [
-  {
-    id: "hr",
-    label: "Croatian",
-    nativeLabel: "Hrvatski",
-    code: "HR",
-    flag: "🇭🇷",
-    csvUrl: "assets/i18n/wingspan-dict-hr.csv",
-    translationIndex: 2,
-  },
-  {
-    id: "pt",
-    label: "Portugese",
-    nativeLabel: "Português",
-    code: "PT",
-    flag: "🇵🇹",
-    csvUrl: "assets/i18n/wingspan-dict-pt.csv",
-    translationIndex: 2,
-  },
-  // Add new dictionary entries here with their CSV path and translation column index.
-];
 
 let dictionary = [];
 let dictionariesCache = {};
