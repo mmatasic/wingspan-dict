@@ -11,3 +11,10 @@ engleskih naziva.
 
 Pretraživanje je tolerantno na djelomične unose i manje razlike u pisanju, a pri prvom rezultatu pokušava prikazati
 sliku s Wikipedije ako je dostupna.
+
+## Fonts
+
+- Stranica prikazuje statični podnožje s tekstom © 2026 mmatasic i navođenjem autora fontova izvezena iz
+	`public/index.html`.
+- Fontovi koji se koriste: **Cardenio Modern** (Font by Nils Cordes, nilscordes.com) i **ThirstyRoughLt** putem
+	<a href="http://www.onlinewebfonts.com">Web Fonts</a>.

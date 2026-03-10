@@ -315,6 +315,29 @@ main.page {
   box-shadow: 0 16px 40px rgba(114, 241, 225, 0.55);
 }
 
+.page-footer {
+  text-align: center;
+  padding: 2rem 0 3rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 2rem;
+}
+
+.page-footer a {
+  color: #72f1e1;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+  transition: border-color 0.2s ease;
+}
+
+.page-footer a:hover,
+.page-footer a:focus-visible {
+  border-color: #e7ebef;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
