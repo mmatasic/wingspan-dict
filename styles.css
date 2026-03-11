@@ -244,7 +244,7 @@ main.page {
   padding: 1.5rem;
   border-radius: 20px;
   border: 1px solid var(--border);
-  background: var(--panel-strong);
+  background: rgba(114, 241, 225, 0.08); 
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
@@ -286,7 +286,7 @@ main.page {
   padding: 1.5rem;
   border-radius: 22px;
   border: 1px solid var(--border);
-  background: rgba(13, 19, 35, 0.85);
+  background: ver(--panel-strong); 
   box-shadow: var(--shadow);
   position: relative;
   display: grid;
