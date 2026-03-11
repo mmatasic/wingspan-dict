@@ -7,13 +7,40 @@ const resultsSection = document.querySelector(".results");
 const resultsHeading = document.querySelector("[data-results-heading]");
 const languagePickerElement = document.getElementById("language-select");
 const pinnedRowElement = document.querySelector("[data-pinned-row]");
+const languageStorageKey = "wingspanSelectedLanguage";
+
+function loadStoredLanguage() {
+  if (typeof localStorage === "undefined") {
+    return null;
+  }
+  try {
+    const storedId = localStorage.getItem(languageStorageKey);
+    if (!storedId) {
+      return null;
+    }
+    return languages.find((language) => language.id === storedId) ?? null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function persistLanguageSelection(langId) {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(languageStorageKey, langId);
+  } catch (error) {
+    // Fail quietly when storage is unavailable.
+  }
+}
 
 let dictionary = [];
 let dictionariesCache = {};
 let wingsearchData = [];
 let searchId = 0;
 let inputDebounce = null;
-let currentLanguage = languages[0];
+let currentLanguage = loadStoredLanguage() ?? languages[0];
 
 const pinnedStorageKey = "wingspanPinnedBirds";
 let pinnedBirds = [];
@@ -104,6 +131,7 @@ async function changeLanguage(langId, { force = false } = {}) {
     const rows = await loadDictionary(targetLanguage);
     dictionary = rows;
     currentLanguage = targetLanguage;
+    persistLanguageSelection(targetLanguage.id);
     renderLanguagePicker();
     searchInput.value = "";
     resetResults();
