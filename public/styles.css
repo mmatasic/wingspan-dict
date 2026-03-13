@@ -366,6 +366,13 @@ main.page {
   margin-bottom: 0px;
 }
 
+.translation-missing {
+  margin: 0 0 0.4rem 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .card-body h2,
 .card-body .meta {
   font-family: "CardenioModern", sans-serif;

@@ -87,7 +87,7 @@ function parseCsv(text, language) {
         translation,
       };
     })
-    .filter((row) => row.latin && row.translation);
+    .filter((row) => row.latin);
 }
 
 function parseWingSearchCsv(text) {
@@ -174,6 +174,24 @@ function capitalize(value) {
       //just first letter of first word
       .replace(/^\S/, (match) => match.toUpperCase())
   );
+}
+
+function formatLatinName(value) {
+  if (!value) {
+    return "";
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  const lower = trimmed.toLowerCase();
+  const chars = Array.from(lower);
+  const letterIndex = chars.findIndex((char) => /\p{L}/u.test(char));
+  if (letterIndex === -1) {
+    return trimmed;
+  }
+  chars[letterIndex] = chars[letterIndex].toUpperCase();
+  return chars.join("");
 }
 
 function handleInput() {
@@ -269,10 +287,13 @@ function renderPinnedBirds() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "pin-chip";
-    const translation = capitalize(bird.translation || bird.latin);
+    const formattedLatin = formatLatinName(bird.latin);
+    const translation = bird.translation
+      ? capitalize(bird.translation)
+      : formattedLatin;
     button.innerHTML = `
       <span class="pin-chip-label">${translation}</span>
-      <span class="pin-chip-english">${bird.english || bird.latin}</span>
+      <span class="pin-chip-english">${bird.english || formattedLatin}</span>
     `;
     button.addEventListener("click", () => {
       const query = bird.english || bird.translation || bird.latin;
@@ -347,7 +368,15 @@ function renderMatches(matches, requestId) {
 
   matches.forEach(({ row }, index) => {
     const rank = index + 1;
-    const translationCapitalized = capitalize(row.translation);
+    const formattedLatin = formatLatinName(row.latin);
+    const translationValue = (row.translation || "").trim();
+    const hasTranslation = Boolean(translationValue);
+    const translationCapitalized = hasTranslation
+      ? capitalize(translationValue)
+      : row.english || formattedLatin;
+    const translationNotice = hasTranslation
+      ? ""
+      : `<p class="translation-missing">*Translation not currently available for ${currentLanguage.label}; showing the English name instead.</p>`;
     const card = document.createElement("article");
     card.className = "card";
     const wingsearchLinks = wingsearchData
@@ -365,14 +394,15 @@ function renderMatches(matches, requestId) {
         <div class="figure-wrapper">
         <figure>
           <a class="figure-link" target="_blank" rel="noreferrer noopener">
-            <img alt="Slika ${row.latin}" loading="lazy" />
-            <figcaption class="figcaption-link">${row.latin}</figcaption>
+            <img alt="Slika ${formattedLatin}" loading="lazy" />
+            <figcaption class="figcaption-link">${formattedLatin}</figcaption>
           </a>
         </figure>
         </div>
         <div class="card-body">
-          <h2>${translationCapitalized}</h2>
-          <h3>${row.latin}</h3>
+          <h2>${translationCapitalized}${hasTranslation ? "" : "*"}</h2>
+          ${translationNotice}
+          <h3>${formattedLatin}</h3>
           <p class="meta">${row.english ? `${row.english}` : "English name missing"}</p>
           <p class="extract"></p>
           <div class="card-actions">
@@ -392,7 +422,7 @@ function renderMatches(matches, requestId) {
       imageElement,
       linkElement,
       extractElement,
-      row.latin,
+      formattedLatin,
       row.english,
       requestId,
     );

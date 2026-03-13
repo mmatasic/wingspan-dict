@@ -15,9 +15,8 @@ Search tolerates partial words and fuzzy matches.
 
 ## Translation contribution
 
-- To add another dictionary or translation:
-  1. Drop the new CSV under `public/i18n` (e.g., `public/i18n/wingspan-dict-xx.csv`).
-  2. Register the language in `public/i18n/languages.js` with the required properties (`id`, `label`, `nativeLabel`, `code`, `flag`, `csvUrl`, and `translationIndex`).
-  3. The csv must in first and second column contain english and latin names (used for fuzzy search)
-  3. Provide a translation column index that matches the CSV layout so the parser can pick the correct column.
-  4. Submit the CSV and the languages file changes so the dropdown automatically loads the new locale.
+All translations live inside `public/data/wingspan-dict.csv`. The two leading columns must continue to be Latin (column 1) and English (column 2), which power the fuzzy search.
+
+1. When adding support for a new language, append the translation values as a new column at the end of `wingspan-dict.csv` and register the locale inside `public/src/languages.js` with the column's **zero-based** index assigned to `translationIndex`. This keeps every language pointing to the shared dictionary while letting the parser pick the correct column.
+2. If you are improving an existing language, fill any empty cells in the existing translation column instead of adding a separate CSV so that users see accurate translations without duplication.
+3. Bundle both the updated CSV and the languages entry in the same pull request so the dropdown can immediately load the new or corrected locale.
