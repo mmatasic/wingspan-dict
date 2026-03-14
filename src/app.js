@@ -412,9 +412,9 @@ function renderMatches(matches, requestId) {
       .join("");
 
     card.innerHTML = `
-        <div class="card-rank">#${rank}</div>
         <div class="figure-wrapper">
         <figure>
+          <div class="card-figure-rank"><span>#${rank}</span></div>
           <a class="figure-link" target="_blank" rel="noreferrer noopener">
             <img alt="Slika ${formattedLatin}" loading="lazy" />
             <figcaption class="figcaption-link">${formattedLatin}</figcaption>
