@@ -7,7 +7,9 @@ const resultsSection = document.querySelector(".results");
 const resultsHeading = document.querySelector("[data-results-heading]");
 const languagePickerElement = document.getElementById("language-select");
 const pinnedRowElement = document.querySelector("[data-pinned-row]");
+const wingspanOnlyInput = document.getElementById("wingspan-only");
 const languageStorageKey = "wingspanSelectedLanguage";
+const wingspanFilterStorageKey = "wingspanOnlyFilter";
 
 function loadStoredLanguage() {
   if (typeof localStorage === "undefined") {
@@ -35,9 +37,32 @@ function persistLanguageSelection(langId) {
   }
 }
 
+function loadWingspanFilterPreference() {
+  if (typeof localStorage === "undefined") {
+    return false;
+  }
+  try {
+    return localStorage.getItem(wingspanFilterStorageKey) === "true";
+  } catch (error) {
+    return false;
+  }
+}
+
+function persistWingspanFilterPreference(value) {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(wingspanFilterStorageKey, value ? "true" : "false");
+  } catch (error) {
+    // Fail quietly when storage is unavailable.
+  }
+}
+
 let dictionary = [];
 let dictionariesCache = {};
 let wingsearchData = [];
+const wingsearchNameSet = new Set();
 let searchId = 0;
 let inputDebounce = null;
 let currentLanguage = loadStoredLanguage() ?? languages[0];
@@ -57,6 +82,14 @@ async function bootstrap() {
       inputDebounce = setTimeout(handleInput, 450);
     });
     searchInput.addEventListener("keydown", handleSearchKeydown);
+    if (wingspanOnlyInput) {
+      wingspanOnlyInput.checked = loadWingspanFilterPreference();
+      wingspanOnlyInput.addEventListener("change", () => {
+        persistWingspanFilterPreference(Boolean(wingspanOnlyInput.checked));
+        shouldScrollOnResults = false;
+        handleInput();
+      });
+    }
     runSearchFromUrl();
   } catch (error) {
     resultsHeading.innerHTML = `Error reading dictionary`;
@@ -66,6 +99,10 @@ async function bootstrap() {
   if (wingsearchResponse.ok) {
     const wingsearchText = await wingsearchResponse.text();
     wingsearchData = parseWingSearchCsv(wingsearchText);
+    rebuildWingsearchLookup();
+    if (wingspanOnlyInput?.checked && searchInput.value.trim()) {
+      handleInput();
+    }
   }
 }
 
@@ -134,6 +171,32 @@ function parseWingSearchCsv(text) {
       const [id, english, latin] = line.split(",").map((value) => value.trim());
       return { id: id || "", english: english || "", latin: latin || "" };
     });
+}
+
+function rebuildWingsearchLookup() {
+  wingsearchNameSet.clear();
+  wingsearchData.forEach((entry) => {
+    const latin = entry.latin?.toLowerCase() ?? "";
+    const english = entry.english?.toLowerCase() ?? "";
+    if (latin) {
+      wingsearchNameSet.add(latin);
+    }
+    if (english) {
+      wingsearchNameSet.add(english);
+    }
+  });
+}
+
+function isWingsearchBird(row) {
+  if (!row || !wingsearchNameSet.size) {
+    return false;
+  }
+  const latin = row.latin?.toLowerCase() ?? "";
+  const english = row.english?.toLowerCase() ?? "";
+  return (
+    (latin && wingsearchNameSet.has(latin)) ||
+    (english && wingsearchNameSet.has(english))
+  );
 }
 
 async function loadDictionary(language) {
@@ -235,11 +298,23 @@ function handleInput() {
     return;
   }
 
+  const shouldFilterByWingspan = Boolean(wingspanOnlyInput?.checked);
+
+  if (shouldFilterByWingspan && !wingsearchNameSet.size) {
+    resultsHeading.innerHTML = `<p>The Wingspan card list is still loading. Try again in a moment.</p>`;
+    clearResults();
+    return;
+  }
+
   const normalizedQuery = query.toLowerCase();
   const scoreThreshold = Math.max(normalizedQuery.length, 5);
   const currentSearchId = ++searchId;
 
-  const matches = dictionary
+  const searchTargets = shouldFilterByWingspan
+    ? dictionary.filter((row) => isWingsearchBird(row))
+    : dictionary;
+
+  const matches = searchTargets
     .map((row) => {
       const normalizedLatin = row.latin.toLowerCase();
       const normalizedEnglish = row.english.toLowerCase();
@@ -259,7 +334,10 @@ function handleInput() {
     .slice(0, 3);
 
   if (!matches.length) {
-    resultsHeading.innerHTML = `<p>No results found for "${query}". Try a different entry.</p>`;
+    const noMatchMessage = shouldFilterByWingspan
+      ? `No Wingspan birds found for "${query}". Try another bird or disable the "only wingspan birds" filter.`
+      : `No results found for "${query}". Try a different entry.`;
+    resultsHeading.innerHTML = `<p>${noMatchMessage}</p>`;
     clearResults();
     if (shouldScrollOnResults) {
       scrollToResultsSection();
@@ -339,8 +417,10 @@ function renderPinnedBirds() {
         return;
       }
       searchInput.value = query;
+      shouldScrollOnResults = true;
       handleInput();
       searchInput.blur();
+      button.blur();
     });
     pinnedRowElement.appendChild(button);
   });
