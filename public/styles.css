@@ -245,7 +245,6 @@ main.page {
 .hero .tag {
   font-family: "CardenioModern", sans-serif;
   font-size: 2.95rem;
-  letter-spacing: 0.2em;
   color: var(--accent);
   font-weight: bold;
   margin: 0;
