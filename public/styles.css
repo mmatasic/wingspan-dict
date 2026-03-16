@@ -38,7 +38,7 @@
 }
 
 :root {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: "OpenSans", sans-serif;
   color: #0b1220;
   background-color: #05060c;
   --panel: rgba(255, 255, 255, 0.08);
@@ -79,8 +79,8 @@ body {
 }
 
 .language-picker select {
-  font-family: "CardenioModern", sans-serif;
-  font-size: 0.8rem;
+  font-family: "CardenioModernBold", sans-serif;
+  font-size: 1rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   padding: 0.45rem 1.4rem 0.45rem 1rem;
@@ -118,8 +118,10 @@ body {
 }
 
 .title {
-  align-self: center;
+  align-self:center;
+  width: 100%;
 }
+
  
 main.page {
   width: 100%;
@@ -235,8 +237,8 @@ main.page {
 
 .hero .tag {
   font-family: "CardenioModern", sans-serif;
-  font-size: 1.95rem;
-  letter-spacing: 0.3em;
+  font-size: 2.95rem;
+  letter-spacing: 0.2em;
   color: var(--accent);
   font-weight: bold;
   margin: 0;
@@ -321,6 +323,29 @@ main.page {
   font-size: 0.65rem;
   color: var(--text-muted);
   text-transform: uppercase;
+}
+
+.search-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.search-filter__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.search-filter__toggle {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
 }
 
 .results {
@@ -457,7 +482,6 @@ main.page {
   bottom: 0;
   left: 0;
   text-align: center;
-  letter-spacing: 0.08em;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -667,16 +691,6 @@ main.page {
 
   .card-body {
     padding-bottom: 2.25rem;
-  }
-
-  .language-picker {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .language-picker select {
-    max-width: 100%;
-    width: 100%;
   }
 }
 
