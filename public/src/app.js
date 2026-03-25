@@ -8,8 +8,12 @@ const resultsHeading = document.querySelector("[data-results-heading]");
 const languagePickerElement = document.getElementById("language-select");
 const pinnedRowElement = document.querySelector("[data-pinned-row]");
 const wingspanOnlyInput = document.getElementById("wingspan-only");
+const targetLanguageSearchInput = document.getElementById(
+  "search-target-language",
+);
 const languageStorageKey = "wingspanSelectedLanguage";
 const wingspanFilterStorageKey = "wingspanOnlyFilter";
+const targetLanguageSearchStorageKey = "wingspanTargetLanguageSearch";
 const macaulayCdnBase =
   "https://cdn.download.ams.birds.cornell.edu/api/v2/asset/";
 
@@ -56,6 +60,31 @@ function persistWingspanFilterPreference(value) {
   }
   try {
     localStorage.setItem(wingspanFilterStorageKey, value ? "true" : "false");
+  } catch (error) {
+    // Fail quietly when storage is unavailable.
+  }
+}
+
+function loadTargetLanguageSearchPreference() {
+  if (typeof localStorage === "undefined") {
+    return false;
+  }
+  try {
+    return localStorage.getItem(targetLanguageSearchStorageKey) === "true";
+  } catch (error) {
+    return false;
+  }
+}
+
+function persistTargetLanguageSearchPreference(value) {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(
+      targetLanguageSearchStorageKey,
+      value ? "true" : "false",
+    );
   } catch (error) {
     // Fail quietly when storage is unavailable.
   }
@@ -147,6 +176,16 @@ async function bootstrap() {
         persistWingspanFilterPreference(Boolean(wingspanOnlyInput.checked));
         shouldScrollOnResults = false;
         renderPinnedBirds();
+        handleInput();
+      });
+    }
+    if (targetLanguageSearchInput) {
+      targetLanguageSearchInput.checked = loadTargetLanguageSearchPreference();
+      targetLanguageSearchInput.addEventListener("change", () => {
+        persistTargetLanguageSearchPreference(
+          Boolean(targetLanguageSearchInput.checked),
+        );
+        shouldScrollOnResults = false;
         handleInput();
       });
     }
@@ -378,6 +417,9 @@ function handleInput() {
   }
 
   const shouldFilterByWingspan = Boolean(wingspanOnlyInput?.checked);
+  const shouldSearchTargetLanguage = Boolean(
+    targetLanguageSearchInput?.checked,
+  );
 
   if (shouldFilterByWingspan && !wingsearchNameSet.size) {
     resultsHeading.innerHTML = `<p>The Wingspan card list is still loading. Try again in a moment.</p>`;
@@ -401,10 +443,20 @@ function handleInput() {
       const englishDistance = row.english
         ? closestDistance(normalizedEnglish, normalizedQuery)
         : Infinity;
-      const bestDistance = Math.min(latinDistance, englishDistance);
+      const normalizedTranslation = (row.translation || "").toLowerCase();
+      const translationDistance =
+        shouldSearchTargetLanguage && normalizedTranslation
+          ? closestDistance(normalizedTranslation, normalizedQuery)
+          : Infinity;
+      const partialBest = Math.min(latinDistance, englishDistance);
+      const bestDistance = shouldSearchTargetLanguage
+        ? Math.min(partialBest, translationDistance)
+        : partialBest;
       const hasSubstring =
         normalizedLatin.includes(normalizedQuery) ||
-        normalizedEnglish.includes(normalizedQuery);
+        normalizedEnglish.includes(normalizedQuery) ||
+        (shouldSearchTargetLanguage &&
+          normalizedTranslation.includes(normalizedQuery));
       const score = hasSubstring ? bestDistance * 0.5 : bestDistance;
       return { row, score };
     })
