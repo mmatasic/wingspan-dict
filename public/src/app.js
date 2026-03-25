@@ -638,10 +638,12 @@ function renderMatches(matches, requestId) {
       imageElement,
       linkElement,
       extractElement,
+      translationValue,
       formattedLatin,
       row.english,
       mediaCreditElement,
       requestId,
+      currentLanguage,
     );
     const pinButton = card.querySelector("[data-pin-toggle]");
     if (pinButton) {
@@ -675,14 +677,31 @@ async function queryWikipedia(
   imgElement,
   linkElement,
   extractElement,
+  translation,
   title,
   titleEnglish,
   mediaCreditElement,
   requestId,
+  language,
 ) {
-  let summary = await fetchBirdImage(title.toLowerCase());
-  if (!summary) {
-    summary = await fetchBirdImage(titleEnglish.toLowerCase());
+  const wikiLang = getLanguageWikipediaSubdomain(language);
+  const candidates = [];
+  if (translation) {
+    candidates.push({ text: translation, lang: wikiLang });
+  }
+  if (title) {
+    candidates.push({ text: title, lang: wikiLang });
+  }
+  if (titleEnglish) {
+    candidates.push({ text: titleEnglish, lang: "en" });
+  }
+  let summary = null;
+  for (const candidate of candidates) {
+    const normalizedText = candidate.text.toLowerCase();
+    summary = await fetchBirdImage(normalizedText, candidate.lang);
+    if (summary) {
+      break;
+    }
   }
   if (requestId !== searchId) {
     return;
@@ -701,7 +720,7 @@ async function queryWikipedia(
   }
 
   if (summary?.extract) {
-    extractElement.textContent = summary.extract + "*";
+    extractElement.innerHTML = `${summary.extract}*`;
   } else {
     extractElement.textContent = "No summary available.";
   }
@@ -710,9 +729,18 @@ async function queryWikipedia(
   }
 }
 
-async function fetchBirdImage(title) {
+function getLanguageWikipediaSubdomain(language) {
+  const identifier = language?.id ?? "en";
+  const [primary] = identifier.split(/[_-]/);
+  return (primary || "en").toLowerCase();
+}
+
+async function fetchBirdImage(title, language = "en") {
+  if (!title) {
+    return null;
+  }
   try {
-    const endpoint = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+    const endpoint = `https://${language || "en"}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
     const response = await fetch(endpoint);
     if (!response.ok) {
       return null;
