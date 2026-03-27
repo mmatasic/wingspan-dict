@@ -646,6 +646,9 @@ function renderMatches(matches, requestId) {
     const bowLink = row.speciesCode
       ? `<a href="https://birdsoftheworld.org/bow/species/${encodeURIComponent(row.speciesCode)}/cur/introduction" target="_blank" rel="noreferrer noopener" class="card-action-control">BoW</a>`
       : "";
+    const ebirdLink = row.speciesCode
+      ? `<a href="https://ebird.org/species/${encodeURIComponent(row.speciesCode)}" target="_blank" rel="noreferrer noopener" class="card-action-control">eBird</a>`
+      : "";
     const macaulayAudioButton = row.macaulayAssetCode
       ? `<button class="card-action-control" type="button" data-macaulay-asset="${row.macaulayAssetCode}">♪ Listen**</button>`
       : "";
@@ -674,7 +677,7 @@ function renderMatches(matches, requestId) {
             <button class="pin-button card-action-control" type="button" data-pin-toggle>
               Pin
             </button>
-            ${wingsearchLinks}${bowLink}${macaulayAudioButton}
+            ${wingsearchLinks}${bowLink}${ebirdLink}${macaulayAudioButton}
           </div>
           ${mediaCredit}
           ${audioCredit}
